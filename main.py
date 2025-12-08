@@ -3,13 +3,13 @@ import sys
 import numpy as np
 
 class Body:
-    def __init__(self, x, y, mass, color):
+    def __init__(self, x, y, mass, color, spx = 0, spy = 0):
         self.x = x
         self.y = y
         self.mass = mass
         self.color = color
-        self.vx = 0
-        self.vy = 0
+        self.vx = spx
+        self.vy = spy
 
     def update(self, fx, fy, dt):
         ax = fx / self.mass
@@ -23,7 +23,7 @@ class Body:
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 50)
 
     def getposition(self):
-        return self.x, self.y
+        return int(self.x), int(self.y)
 def force(body1, body2):
     dx = body2.x - body1.x
     dy = body2.y - body1.y
@@ -55,7 +55,11 @@ while running:
             x, y = event.pos
             mass = 100000 + np.random.randint(900000)
             color = (np.random.randint(256), 255, 255)
-            bodies.append(Body(x, y, mass, color))
+            if len(bodies) >= 1:
+                bodies.append(Body(x, y, 1, color, 0.1, 0))
+            else:
+                bodies.append(Body(x, y, mass, color))
+            
     
     for body in bodies:
         fx_total, fy_total = np.random.randint(100), np.random.randint(20)
