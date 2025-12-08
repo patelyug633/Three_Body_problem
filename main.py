@@ -75,4 +75,6 @@ while running:
 pygame.quit()
 sys.exit()
 
+print("hello from structuring branch")
+
 
