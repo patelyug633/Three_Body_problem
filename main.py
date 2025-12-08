@@ -2,81 +2,65 @@ import pygame
 import sys
 import numpy as np
 
+G = 0.1     #Modified gravitational constant
+Screen_width, Screen_height = 640, 480
+bodies = []
 class Body:
-    def __init__(self, x, y, mass, color, spx = 0, spy = 0):
-        self.x = x
-        self.y = y
+    def __init__(self, mass, position, momentum, radius, color):
         self.mass = mass
+        self.position = np.array(position, dtype='float64')
+        self.momentum = np.array(momentum, dtype='float64')
+        self.radius = radius
         self.color = color
-        self.vx = spx
-        self.vy = spy
+    
+    def force(self, other):
+        Gforce = (G * self.mass * other.mass) // ((self.position[0] - other.position[0])**2) + ((self.position[1] - other.position[1])**2)
+        o_x, o_y = other.getPosition()
+        theta = np.arctan(o_y/o_x)
+        force_y = Gforce*np.sin(theta)
+        force_x = Gforce*np.cos(theta)
+        return force_x, force_y
 
-    def update(self, fx, fy, dt):
-        ax = fx / self.mass
-        ay = fy / self.mass
-        self.vx += ax * dt
-        self.vy += ay * dt
-        self.x += self.vx * dt
-        self.y += self.vy * dt
+    def update(self, others, dt):
+        fx, fy = 0, 0
+        for other in others:
+            if other != self:
+                fx_other, fy_other = self.force(other)
+                fx += fx_other
+                fy += fy_other
+        ax = fx/self.mass
+        ay = fy/self.mass
+        self.momentum[0] += ax * dt
+        self.momentum[1] += ay * dt
+        self.position[0] += self.momentum[0] / self.mass * dt
+        self.position[1] += self.momentum[1] / self.mass * dt
 
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 50)
 
-    def getposition(self):
-        return int(self.x), int(self.y)
-def force(body1, body2):
-    dx = body2.x - body1.x
-    dy = body2.y - body1.y
-    distance = (dx**2 + dy**2) ** 0.5
-    if distance == 0:
-        return 0, 0
-    F = G * body1.mass * body2.mass / distance**2
-    theta = np.arctan2(dy, dx)
-    Fx = F * np.cos(theta)
-    Fy = F * np.sin(theta)
-    return Fx, Fy
-
-pygame.init()
-
-screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Three Body Problem Simulation")
-clock = pygame.time.Clock()
-G = 0.1  # Gravitational constant
-bodies = []
-
-
-running = True
-while running:
-    screen.fill((0, 0, 0))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = event.pos
-            mass = 100000 + np.random.randint(900000)
-            color = (np.random.randint(256), 255, 255)
-            if len(bodies) >= 1:
-                bodies.append(Body(x, y, 1, color, 0.1, 0))
-            else:
-                bodies.append(Body(x, y, mass, color))
-            
+    def getPosition(self):
+        return self.position[0], self.position[1]
     
-    for body in bodies:
-        fx_total, fy_total = np.random.randint(100), np.random.randint(20)
-        for other_body in bodies:
-            if body != other_body:
-                fx, fy = force(body, other_body)
-                fx_total += fx
-                fy_total += fy
-        body.update(fx_total, fy_total, 0.1)
-        print(body.getposition())
-        body.draw(screen)
+    def traceOrbit(self):
+        print("tracing orbit")
+    
+pygame.init()
+screen = pygame.display.set_mode((Screen_width, Screen_height), pygame.RESIZABLE)
+clock = pygame.time.Clock()
+base_font = pygame.font.Font(None, 24)
+running = True
+user_mass = ''
+user_velocity = ''
 
+while running:
+    dt = clock.tick(60) / 1000.0
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            running = False
+    text_surface = pygame.render(user_mass, True, (255, 255, 255))
+    # for body in bodies:
+    #     body.update(bodies, dt)
+    #     body.draw(screen)
+    screen.fill((0, 0, 0))
     pygame.display.flip()
     clock.tick(60)
-
-
-pygame.quit()
-sys.exit()
-
-
