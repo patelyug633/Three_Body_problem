@@ -53,22 +53,10 @@ class Body:
     def getPosition(self):
         return int(self.position[0]), int(self.position[1])
 
-# --- Pygame setup ---
-pygame.init()
-screen = pygame.display.set_mode((Screen_width, Screen_height))
-pygame.display.set_caption("Three Body Problem Simulation")
-clock = pygame.time.Clock()
-
-bodies = []
-running = True
-
-# --- Main loop ---
-while running:
-    screen.fill((0, 0, 0))  # Clear screen
-
+def event_loop():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            return False
         # Add body with mouse click
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
@@ -92,6 +80,20 @@ while running:
                     radius=15,
                     color=(0, 0, 255)
                 ))
+    return True
+# --- Pygame setup ---
+pygame.init()
+screen = pygame.display.set_mode((Screen_width, Screen_height))
+pygame.display.set_caption("Three Body Problem Simulation")
+clock = pygame.time.Clock()
+
+bodies = []
+running = True
+
+# --- Main loop ---
+while running:
+    screen.fill((0, 0, 0))  # Clear screen
+    running = event_loop()
     
     # Update and draw bodies
     for body in bodies:
