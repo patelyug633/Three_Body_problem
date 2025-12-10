@@ -1,107 +1,103 @@
 import pygame
-import sys
 import numpy as np
+import sys
 
-# --- Simulation constants ---
-G = 6.67430e-11        # Real gravitational constant
+pygame.init()
+G = 6.67430e-11         # Real gravitational constant
 distance_scale = 1e6   # 1 pixel = 1,000,000 meters
-time_scale = 60*30  # 1 frame = 1 day
+time_scale = 60*60*24  # 1 frame = 1 day
+F_dt = 1/60 # 1 frame = 1 second
 
-Screen_width, Screen_height = 640, 480
-
-# --- Body class ---
-class Body:
+class body:
     def __init__(self, mass, position, velocity, radius, color):
         self.mass = mass
         self.position = np.array(position, dtype='float64')
         self.velocity = np.array(velocity, dtype='float64')
         self.radius = radius
         self.color = color
-    
-    def force(self, other):
-        # Compute vector from self to other in meters
+        self.trail = []
+    def force(self,other):
         dx = (other.position[0] - self.position[0]) * distance_scale
         dy = (other.position[1] - self.position[1]) * distance_scale
         distance = np.sqrt(dx**2 + dy**2)
         if distance == 0:
-            return 0, 0
-        force_magnitude = G * self.mass * other.mass / distance**2
-        fx = force_magnitude * dx / distance
-        fy = force_magnitude * dy / distance
+            return 0,0
+        force = G * other.mass * self.mass / distance**2
+        fx = force * dx / distance
+        fy = force * dy / distance
         return fx, fy
-
     def update(self, others, dt):
-        fx_total, fy_total = 0, 0
+        fx, fy = 0,0
         for other in others:
             if other != self:
-                fx, fy = self.force(other)
-                fx_total += fx
-                fy_total += fy
-        # Acceleration in m/s^2
-        ax = fx_total / self.mass
-        ay = fy_total / self.mass
-        # Update velocity (m/s)
-        self.velocity[0] += ax * dt * time_scale
-        self.velocity[1] += ay * dt * time_scale
-        # Update position (pixels)
-        self.position[0] += self.velocity[0] * dt * time_scale / distance_scale
-        self.position[1] += self.velocity[1] * dt * time_scale / distance_scale
-
+                fxi, fyi = self.force(other)
+                fx += fxi
+                fy += fyi
+        ax = fx / self.mass
+        ay = fy / self.mass
+        scalled_dt = dt * time_scale
+        self.velocity[0] += ax * scalled_dt
+        self.velocity[1] += ay * scalled_dt
+        self.position[0] += self.velocity[0] * scalled_dt / distance_scale
+        self.position[1] += self.velocity[1] * scalled_dt / distance_scale
+        self.trail.append((self.position[0], self.position[1]))
+        if len(self.trail) > 500:
+            self.trail.pop(0)
+    
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, self.getPosition(), self.radius)
+        pygame.draw.circle(screen, self.color, (self.position[0], self.position[1]), self.radius)
+        self.draw_trail(screen)
+    
+    def draw_trail(self, screen):
+        if len(self.trail) > 2:
+            pygame.draw.lines(screen, self.color, False, self.trail, 1)
 
-    def getPosition(self):
-        return int(self.position[0]), int(self.position[1])
+        
+def run_simulation(elapsed_time):
+    while elapsed_time >= F_dt:
+        for b in bodies:
+            b.update(bodies, F_dt)
+        elapsed_time -= F_dt
+    for b in bodies:
+        b.draw(screen)
+    return elapsed_time
+def draw_bodies():
+    for b in bodies:
+        b.draw(screen)
 
-def event_loop():
+screen = pygame.display.set_mode((640, 480))
+running = True
+clock = pygame.time.Clock()
+bodies = []
+elapsed_time = 0
+pause = True
+while running:
+    if not pause:
+        elapsed_time += clock.tick(60) / 1000  # seconds since last frame
+    else:
+        clock.tick(60)
+
+    screen.fill((0, 0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return False
-        # Add body with mouse click
+            running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            # Give random initial velocity for visible motion
-            vx = 550 #np.random.uniform(-500, 500)  # m/s
-            vy = 550 #np.random.uniform(-500, 500)  # m/s
-            bodies.append(Body(
-                mass=10e22,  # smaller mass for visible motion
-                position=(x, y),
-                velocity=(vx, vy),
-                radius=5,
-                color=(255, 0, 0)
-            ))
-        # Add large central body with key 'a'
+            bodies.append(body(10, (x,y), (550,550), 5, (255,0,0)))
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
-                bodies.append(Body(
-                    mass=5.972e24,  # Earth-mass
-                    position=(Screen_width//2, Screen_height//2),
-                    velocity=(0, 0),
-                    radius=15,
-                    color=(0, 0, 255)
-                ))
-    return True
-# --- Pygame setup ---
-pygame.init()
-screen = pygame.display.set_mode((Screen_width, Screen_height))
-pygame.display.set_caption("Three Body Problem Simulation")
-clock = pygame.time.Clock()
-
-bodies = []
-running = True
-
-# --- Main loop ---
-while running:
-    screen.fill((0, 0, 0))  # Clear screen
-    running = event_loop()
+                bodies.append(body(5e24, (320,240), (0,0), 25,(0,0,255)))
+            if event.key == pygame.K_SPACE:
+                pause = not pause
+    if pause:
+        draw_bodies()
+    else:
+        elapsed_time = run_simulation(elapsed_time)
     
-    # Update and draw bodies
-    for body in bodies:
-        body.update(bodies, dt=1)
-        body.draw(screen)
-
+    
+   
     pygame.display.flip()
-    clock.tick(60)
+    
 
 pygame.quit()
-sys.exit()
+sys.quit()
