@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-import sys
 
 pygame.init()
 G = 6.67430e-11         # Real gravitational constant
@@ -100,4 +99,3 @@ while running:
     
 
 pygame.quit()
-sys.quit()
