@@ -107,7 +107,9 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            bodies.append(body(10, (x,y), (550,550), 5, (255,0,0), bodies))
+            x_vel = (np.sqrt((G*5e24)/((320-x)*distance_scale)))
+            bodies.append(body(10, (x,y), (0,x_vel), 5, (255,0,0), bodies))
+            print(x_vel)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
                 bodies.append(body(5e24, (320,240), (0,0), 25,(0,0,255), bodies))
