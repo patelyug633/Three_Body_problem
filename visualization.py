@@ -1,6 +1,7 @@
 import pygame
 from simulation import run_simulation
 from physics import body
+from config import get_PerfectOrbit_velocity as get_Pvelocity
 
 
 def draw_bodies(screen, bodies):
@@ -26,7 +27,8 @@ def vis_loop():
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                bodies.append(body(10, (x,y), (550,550), 5, (255,0,0), bodies))
+                x_vel, y_vel = get_Pvelocity(5e24, (x,y))
+                bodies.append(body(10, (x,y), (x_vel,y_vel), 5, (255,0,0), bodies))
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     bodies.append(body(5e24, (320,240), (0,0), 25,(0,0,255), bodies))

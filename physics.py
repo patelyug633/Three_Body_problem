@@ -63,12 +63,3 @@ class body:
         if len(self.trail) > 2:
             pygame.draw.lines(screen, self.color, False, self.trail, 1)
 
-def update(dt, others):
-        for b in others:
-            b.update_position(dt)
-        new_accelerations = []
-        for b in others:
-            ax, ay = b.getAcceleration(others)
-            new_accelerations.append(np.array([ax, ay], dtype='float64'))
-        for b, new_acc in zip(others, new_accelerations):
-            b.update_velocity(new_acc, dt)

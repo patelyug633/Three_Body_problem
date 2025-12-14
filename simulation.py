@@ -1,5 +1,6 @@
-from physics import body, update
+from physics import body
 from config import F_dt
+from config import update
 
 def run_simulation(elapsed_time, bodies):
     while elapsed_time >= F_dt:
