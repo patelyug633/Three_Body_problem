@@ -107,8 +107,10 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            x_vel = (np.sqrt((G*5e24)/((320-x)*distance_scale)))
-            bodies.append(body(10, (x,y), (0,x_vel), 5, (255,0,0), bodies))
+            Pvelocity = np.sqrt((G*5e24)/(abs((320-x))*distance_scale))
+            x_vel = Pvelocity * abs((x-320))/(np.sqrt((x-320)**2 + (y-240)**2))
+            y_vel = Pvelocity * abs((y-240))/(np.sqrt((x-320)**2 + (y-240)**2))
+            bodies.append(body(10, (x,y), (y_vel,x_vel), 5, (255,0,0), bodies))
             print(x_vel)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
