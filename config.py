@@ -9,10 +9,19 @@ class configuration:
     def get_PerfectOrbit_velocity(self, mass_central, current_pos, central_pos=(320,240)):
         x, y = current_pos
         central_x, central_y = central_pos
-        Pvelocity = np.sqrt((self.G*mass_central)/(abs((central_x-x))*self.distance_scale))
+        Pvelocity = np.sqrt(((self.G)*(mass_central))/(np.sqrt((x-central_x)**2 + (y-central_y)**2)*self.distance_scale))
         x_vel = Pvelocity * abs((x-central_x))/(np.sqrt((x-central_x)**2 + (y-central_y)**2))
         y_vel = Pvelocity * abs((y-central_y))/(np.sqrt((x-central_x)**2 + (y-central_y)**2))
-        return y_vel, x_vel
+        print(y_vel, x_vel)
+        if x < central_x and y < central_y:
+            return y_vel, -x_vel
+        elif x < central_x and y > central_y:
+            return -y_vel, -x_vel
+        elif x > central_x and y > central_y:
+            return -y_vel, x_vel
+        else:
+            return y_vel, x_vel
+        
     def update(self, others):
         dt = self.F_dt
         for b in others:
