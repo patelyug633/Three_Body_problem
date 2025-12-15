@@ -1,9 +1,9 @@
 import numpy as np
 import pygame
-from config import G, distance_scale, time_scale
-
+from config import configuration as config
 
 class body:
+    cfg = None
     def __init__(self, mass, position, velocity, radius, color, others=None):
         self.mass = mass
         self.position = np.array(position, dtype='float64')
@@ -16,6 +16,8 @@ class body:
         if others is not None:
             ax, ay = self.getAcceleration(others)
             self.acceleration = np.array([ax, ay], dtype='float64')
+        if body.cfg is None:
+            body.cfg = config()
     
     def getAcceleration(self, others):
         fx, fy = 0,0
@@ -29,25 +31,25 @@ class body:
         return ax, ay
     
     def force(self,other):
-        dx = (other.position[0] - self.position[0]) * distance_scale
-        dy = (other.position[1] - self.position[1]) * distance_scale
+        dx = (other.position[0] - self.position[0]) * body.cfg.distance_scale
+        dy = (other.position[1] - self.position[1]) * body.cfg.distance_scale
         distance = np.sqrt(dx**2 + dy**2)
         if distance == 0:
             return 0,0
-        force = G * other.mass * self.mass / distance**2
+        force = body.cfg.G * other.mass * self.mass / distance**2
         fx = force * dx / distance
         fy = force * dy / distance
         return fx, fy
     def update_position(self, dt):
-        scaled_dt = dt * time_scale
+        scaled_dt = dt * body.cfg.time_scale
         self.position[0] += (self.velocity[0] * scaled_dt + 
-                             (0.5 * self.acceleration[0] * (scaled_dt**2))) / distance_scale
+                             (0.5 * self.acceleration[0] * (scaled_dt**2))) / body.cfg.distance_scale
         self.position[1] += (self.velocity[1] * scaled_dt + 
-                             (0.5 * self.acceleration[1] * (scaled_dt**2))) / distance_scale
+                             (0.5 * self.acceleration[1] * (scaled_dt**2))) / body.cfg.distance_scale
         self.new_trail_point = (self.position[0], self.position[1])
     
     def update_velocity(self, new_acceleration, dt):
-        scaled_dt = dt * time_scale
+        scaled_dt = dt * (body.cfg.time_scale)
         self.velocity[0] += 0.5 * (self.acceleration[0] + new_acceleration[0]) * scaled_dt
         self.velocity[1] += 0.5 * (self.acceleration[1] + new_acceleration[1]) * scaled_dt
         self.acceleration = new_acceleration
