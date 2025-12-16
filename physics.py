@@ -64,4 +64,12 @@ class body:
     def draw_trail(self, screen):
         if len(self.trail) > 2:
             pygame.draw.lines(screen, self.color, False, self.trail, 1)
-
+    def isbody(self, bodies, pos):
+        for b in bodies:
+            dist = np.sqrt((b.position[0]-pos[0])**2 + (b.position[1]-pos[1])**2)
+            if dist <= b.radius:
+                return b.position
+        return False
+    def handle_selected(self, selected):
+        original_color = selected.color
+        # highlight the borders of the circle, start from here.

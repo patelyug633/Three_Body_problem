@@ -1,7 +1,8 @@
-from visualization import vis_loop
+from visualization import Visualization as vis
 
-
-vis_loop() 
+if __name__ == "__main__":
+    visualization = vis()
+    visualization.vis_loop()
 
 
 

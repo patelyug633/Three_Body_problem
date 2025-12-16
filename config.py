@@ -6,6 +6,7 @@ class configuration:
         self.distance_scale = 1e6   # 1 pixel = 1,000,000 meters
         self.time_scale = 60*60*24  # 1 frame = 1 day
         self.F_dt = 1/60 # 1 frame = 1 second
+        self.bodies = []
     def get_PerfectOrbit_velocity(self, mass_central, current_pos, central_pos=(320,240)):
         x, y = current_pos
         central_x, central_y = central_pos
