@@ -13,7 +13,6 @@ class configuration:
         Pvelocity = np.sqrt(((self.G)*(mass_central))/(np.sqrt((x-central_x)**2 + (y-central_y)**2)*self.distance_scale))
         x_vel = Pvelocity * abs((x-central_x))/(np.sqrt((x-central_x)**2 + (y-central_y)**2))
         y_vel = Pvelocity * abs((y-central_y))/(np.sqrt((x-central_x)**2 + (y-central_y)**2))
-        print(y_vel, x_vel)
         if x < central_x and y < central_y:
             return y_vel, -x_vel
         elif x < central_x and y > central_y:

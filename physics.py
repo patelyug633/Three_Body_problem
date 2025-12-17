@@ -10,6 +10,7 @@ class body:
         self.velocity = np.array(velocity, dtype='float64')
         self.radius = radius
         self.color = color
+        self.selected = False
         self.trail = []
         self.new_trail_point = (self.position[0], self.position[1])
         self.acceleration = np.array([0.0, 0.0], dtype='float64')
@@ -58,18 +59,25 @@ class body:
             self.trail.pop(0)
         
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (self.position[0], self.position[1]), self.radius)
+        if self.selected:
+            pygame.draw.circle(screen, (255,0,0), (self.position[0], self.position[1]), self.radius+2, 2)
+            pygame.draw.circle(screen, self.color, (self.position[0], self.position[1]), self.radius)
+        else:
+            pygame.draw.circle(screen, self.color, (self.position[0], self.position[1]), self.radius)
         self.draw_trail(screen)
     
     def draw_trail(self, screen):
         if len(self.trail) > 2:
             pygame.draw.lines(screen, self.color, False, self.trail, 1)
-    def isbody(self, bodies, pos):
+    @staticmethod
+    def select_body(bodies, position, screen):
         for b in bodies:
-            dist = np.sqrt((b.position[0]-pos[0])**2 + (b.position[1]-pos[1])**2)
-            if dist <= b.radius:
-                return b.position
-        return False
-    def handle_selected(self, selected):
-        original_color = selected.color
-        # highlight the borders of the circle, start from here.
+            dx = b.position[0] - position[0]
+            dy = b.position[1] - position[1]
+            distance = np.sqrt(dx**2 + dy**2)
+            if distance <= b.radius:
+                for other_b in bodies:
+                    other_b.selected = False
+                b.selected = not b.selected
+                return b
+        return None
