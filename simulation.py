@@ -25,3 +25,7 @@ class Simulation:
 
     def append_elapsed_time(self, time):
         self.elapsed_time += time
+
+    def draw_bodies(self, screen, bodies):
+        for b in bodies:
+            b.draw(screen)

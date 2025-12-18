@@ -69,8 +69,12 @@ class body:
     def draw_trail(self, screen):
         if len(self.trail) > 2:
             pygame.draw.lines(screen, self.color, False, self.trail, 1)
+    def get_velocity_magnitude(self):
+        return np.sqrt(self.velocity[0]**2 + self.velocity[1]**2)
+    def get_acceleration_magnitude(self):
+        return np.sqrt(self.acceleration[0]**2 + self.acceleration[1]**2)
     @staticmethod
-    def select_body(bodies, position, screen):
+    def select_body(bodies, position):
         for b in bodies:
             dx = b.position[0] - position[0]
             dy = b.position[1] - position[1]
