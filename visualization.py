@@ -10,16 +10,83 @@ class VisualizationError(Exception):
 class Visualization:
     pygame.init()
     def __init__(self):
-        self.screen_HW = (960, 720)
+        self.screen_HW = (1020, 720)
         self.screen = pygame.display.set_mode(self.screen_HW)
         self.simulation = sim()
         self.cfg = config()
-        self.Uim = pgui.UIManager(self.screen_HW)
+        self.Uim = pgui.UIManager(self.screen_HW, 'theme.json')
         self.bodies = self.cfg.bodies
         self.pause = True
         self.show_vectors = True
         self.running = True
         self.clock = pygame.time.Clock()
+
+        # UI panel
+        self.info_panel = pgui.elements.UIPanel(relative_rect=pygame.Rect((0, 0), (300, self.screen_HW[1])),
+                                                 manager=self.Uim)
+        
+        # Velocity and Acceleration check boxes
+        self.velocity_checkbox = pgui.elements.UICheckBox(relative_rect=pygame.Rect((10, 470), (15, 15)),
+            text='Toggle Velocity Vectors (V)',
+            manager=self.Uim,
+            container=self.info_panel)
+        self.acceleration_checkbox = pgui.elements.UICheckBox(relative_rect=pygame.Rect((10, 490), (15, 15)),
+            text='Toggle Acceleration Vectors (A)',
+            manager=self.Uim,
+            container=self.info_panel)
+        
+        # Mass label
+        self.mass_label = pgui.elements.UILabel(
+            relative_rect=pygame.Rect((-40, 510), (150, 30)),
+            text="Mass:",
+            manager=self.Uim,
+            container=self.info_panel,
+            object_id='#label'  # Optional: for custom styling
+        )
+        # Mass unit label
+        self.mass_unit_label = pgui.elements.UILabel(
+            relative_rect=pygame.Rect((180, 510), (150, 30)),
+            text="Kg",
+            manager=self.Uim,
+            container=self.info_panel,
+            object_id='#label'  # Optional: for custom styling
+        )
+        # Radius label
+        self.radius_label = pgui.elements.UILabel(
+            relative_rect=pygame.Rect((-40, 540), (150, 30)),
+            text="Radius:",
+            manager=self.Uim,
+            container=self.info_panel,
+            object_id='#label'  # Optional: for custom styling
+        )
+
+        # Radius unit label
+        self.radius_unit_label = pgui.elements.UILabel(
+            relative_rect=pygame.Rect((192, 540), (150, 30)),
+            text="Pixels",
+            manager=self.Uim,
+            container=self.info_panel,
+            object_id='#label'  # Optional: for custom styling
+        )
+        # Mass and Radius text boxes
+        self.mass_textbox = pgui.elements.UITextEntryLine(relative_rect=pygame.Rect((60, 510), (180, 30)),
+            manager=self.Uim,
+            container=self.info_panel)
+        
+    
+
+        self.radius_textbox = pgui.elements.UITextEntryLine(relative_rect=pygame.Rect((65, 540), (180, 30)),
+            manager=self.Uim,
+            container=self.info_panel)  
+        
+        # clear bodies button
+        self.clear_bodies_button = pgui.elements.UIButton(relative_rect=pygame.Rect((10, 670), (280, 30)),
+            text='Clear All Bodies',
+            manager=self.Uim,
+            container=self.info_panel,
+            object_id='#Clearbodies_button')
+               
+
     def draw_bodies(self):
         for b in self.bodies:
             b.draw(self.screen)
@@ -72,6 +139,8 @@ class Visualization:
             else:
                 self.simulation.run_simulation(self.bodies)
                 self.draw_bodies()
+                
+            self.Uim.draw_ui(self.screen)
 
             pygame.display.flip()
         pygame.quit()
@@ -79,11 +148,13 @@ class Visualization:
     def handle_Mouseclick(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
+            if x < 300:
+                return
             b = body.select_body(self.bodies, (x,y))
             if b is not None:
                 print(f"Selected body at position: {b.position} with mass: {b.mass}")
             else:
-                x_vel, y_vel = self.cfg.get_PerfectOrbit_velocity(5e24, (x,y), (self.screen_HW[0]/2, self.screen_HW[1]/2))
+                x_vel, y_vel = self.cfg.get_PerfectOrbit_velocity(5e24, (x,y), ((self.screen_HW[0] + 300)/2, self.screen_HW[1]/2))
                 self.bodies.append(body(10, (x,y), (x_vel,y_vel), 5, (255,0,0), self.bodies))
     
     def handle_Keypress(self, event):
@@ -93,7 +164,7 @@ class Visualization:
                     if b.selected:
                         self.bodies.remove(b)
             if event.key == pygame.K_a:
-                self.bodies.append(body(5e24, (self.screen_HW[0]/2, self.screen_HW[1]/2), (0,0), 25,(0,0,255), self.bodies))
+                self.bodies.append(body(5e24, ((self.screen_HW[0]+300)/2, self.screen_HW[1]/2), (0,0), 25,(0,0,255), self.bodies))
             if event.key == pygame.K_SPACE:
                 self.pause = not self.pause
             if event.key == pygame.K_ESCAPE:

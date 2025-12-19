@@ -1,0 +1,21 @@
+{
+    
+  "button": {
+    "colours": {
+      "normal_bg": "#2C3E50",
+      "normal_text": "#ECF0F1",
+      "hovered_bg": "#34495E",
+      "hovered_text": "#3498DB",
+      "disabled_text": "#95A5A6"
+    }
+  },
+  "#Clearbodies_button": {
+    "colours": {
+      "normal_bg": "#4a4a4a",
+      "normal_text": "#FA2C00",
+      "hovered_bg": "#FA2C00",
+      "hovered_text": "#FFFFFF",
+      "disabled_text": "#9a9a9a"
+    }
+  }
+}
