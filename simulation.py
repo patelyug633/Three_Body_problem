@@ -4,11 +4,12 @@ from config import configuration as config
 class SimulationError(Exception):
     pass
 class Simulation:
-    def __init__(self):
+    def __init__(self, viz):
         self.elapsed_time = 0.0
         self.cfg = config()
-        self.is_cenBody_alone = None # To track if central body is only one in the simulation
+        self.centralBodies = [] # To track if central body is only one in the simulation
         self.bodies = self.cfg.bodies
+        self.viz = viz
         
     def getConfig(self):
         return self.cfg
@@ -39,32 +40,40 @@ class Simulation:
     def add_central_body(self, mass=5e24, position=(400, 300), velocity=(0, 0), radius=25, color=(255, 255, 0)):
         central_body = body(mass=mass, position=position, velocity=velocity, radius=radius, color=color)
         self.bodies.append(central_body)
-        if self.is_cenBody_alone is None:
-            self.is_cenBody_alone = central_body
-        else:
-            self.is_cenBody_alone = [self.is_cenBody_alone, central_body]
+        self.centralBodies.append(central_body)
         return central_body
 
     def add_satellite_body(self, onPos, mass = 10, radius = 5, color = (255,0,0), velocity = None):
-        if velocity is None and isinstance(self.is_cenBody_alone, body):
-            velocity  = self.cfg.get_PerfectOrbit_velocity(self.is_cenBody_alone.mass, onPos, self.is_cenBody_alone.position)
+        if velocity is None and len(self.centralBodies) == 1:
+            velocity  = self.cfg.get_PerfectOrbit_velocity(self.centralBodies[0].mass, onPos, self.centralBodies[0].position)
         if velocity is None:
             velocity = (0,0)
         satellite = body(mass=mass, position=onPos, velocity=velocity, radius=radius, color=color)
         self.bodies.append(satellite)
         return satellite
 
-    def handle_click(self, position):
+    def handle_click(self, position, mode):
         x, y = position
         b = body.select_body(self.bodies, (x, y))
         if b is not None:
             print(f"Selected body at position: {b.position} with mass: {b.mass}")
         else:
-            self.add_satellite_body((x, y))
-    
+            if mode == "Add_satelite":
+                self.add_satellite_body((x, y))
+                mode = None
+                self.viz.info_panel.elements["add_sat"].unselect()
+            elif mode == "Add_Central":
+                self.add_central_body(mass = 5e24, 
+                    position =(x, y),
+                    velocity = (0,0),
+                    radius = 25,
+                    color = (0,0,255))
+                mode = None
+                self.viz.info_panel.elements["add_cen"].unselect()
+        return mode
     def remove_body(self):
-        for b in self.bodies:
-                    if b.selected:
-                        if b is self.is_cenBody_alone:
-                            self.is_cenBody_alone = None
-                        self.bodies.remove(b)
+        for b in self.bodies[:]:
+            if b.selected:
+                if b in self.centralBodies:
+                    self.centralBodies.remove(b)
+                self.bodies.remove(b)
