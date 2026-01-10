@@ -1,3 +1,5 @@
+#visualization.py
+
 import pygame
 import pygame_gui as pgui
 from physics import body
@@ -12,7 +14,7 @@ class VisualizationError(Exception):
 class Visualization:
     pygame.init()
     def __init__(self):
-        self.screen_HW = (1020, 720)
+        self.screen_HW = (1320, 720)
         self.screen = pygame.display.set_mode(self.screen_HW)
         self.simulation = sim(self)
         self.cfg = self.simulation.cfg
@@ -20,12 +22,14 @@ class Visualization:
         self.bodies = self.simulation.bodies
         self.pause = True
         self.input_mode = None
-        # self.show_vectors = True
+        self.dragging_body = None
+        self.drag_offset = (0, 0)
         self.show_vector_v = False
         self.show_vector_a = False
         self.running = True
         self.clock = pygame.time.Clock()
-        self.info_panel = UIComponents(self.Uim, self.screen_HW).build()
+        self.UIBuilder = UIComponents(self.Uim, self.screen_HW)
+        self.info_panel = self.UIBuilder.build()
         self.UI_handler = UIEventHandler(self)       
 
     # Keep it !

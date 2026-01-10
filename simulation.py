@@ -54,8 +54,9 @@ class Simulation:
 
     def handle_click(self, position, mode):
         x, y = position
-        b = body.select_body(self.bodies, (x, y))
+        b = body.select_body(self.bodies, (x, y)) if mode is None else None
         if b is not None:
+            self.viz.UIBuilder.selected_body_panel(b)
             print(f"Selected body at position: {b.position} with mass: {b.mass}")
         else:
             if mode == "Add_satelite":
@@ -70,6 +71,9 @@ class Simulation:
                     color = (0,0,255))
                 mode = None
                 self.viz.info_panel.elements["add_cen"].unselect()
+            else:
+                body.unselect_body(self.bodies)
+                self.viz.UIBuilder.selected_body_panel_kill()
         return mode
     def remove_body(self):
         for b in self.bodies[:]:
@@ -77,3 +81,7 @@ class Simulation:
                 if b in self.centralBodies:
                     self.centralBodies.remove(b)
                 self.bodies.remove(b)
+    
+    def remov_every_body(self):
+        self.centralBodies.clear()
+        self.bodies.clear()

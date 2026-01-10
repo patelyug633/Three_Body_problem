@@ -84,4 +84,9 @@ class body:
                     other_b.selected = False
                 b.selected = not b.selected
                 return b
-        return None
+    
+    @staticmethod
+    def unselect_body(bodies):
+        for b in bodies:
+            if b.selected:
+                b.selected = False
