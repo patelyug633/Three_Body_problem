@@ -135,7 +135,7 @@ class UIComponents:
 
     def selected_body_panel(self, b):
         self.selected_body_panel_kill()
-        self.create_panel("mass_prop", (1020,0),(300,400))
+        self.create_panel("mass_prop", (1020,0),(300,500))
         y = 0
 
         self.label("mass_properties", "Selected Mass properties", (50, y), (200,30), self.panel["mass_prop"])
@@ -153,6 +153,12 @@ class UIComponents:
         self.textBox("Rad_textBox", (60, y), (180, 30), self.panel["mass_prop"])
         self.elements["Rad_textBox"].set_text(str(b.radius))
         self.label("rad_lblUnits", "Pixels", (160, y), (200, 30), self.panel["mass_prop"])
+        y += gap_y - 15
+
+        self.label("color_lbl", "color: ", (-70, y), (200, 30), self.panel["mass_prop"])
+        self.textBox("Color_textBox", (60, y), (180, 30), self.panel["mass_prop"])
+        self.elements["Color_textBox"].set_text(str(b.get_color()))
+        self.label("color_lblUnits", "RGB", (160, y), (200, 30), self.panel["mass_prop"])
         y += gap_y - 15
 
         self.label("velocoty_lbl", "Velocity (m/s): ", (-45, y), (200, 30), self.panel["mass_prop"])
@@ -190,10 +196,11 @@ class UIComponents:
         y += gap_y//2
         
         
-        if b.mass > 5e11:
+        if b.mass > 7e22:
             self.elements["perfect_Orbit"].disable()
         if len(self.viz.simulation.centralBodies) >= 2:
             self.elements["perfect_Orbit"].disable()
+        
         
     
     def selected_body_panel_kill(self):

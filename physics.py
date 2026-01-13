@@ -4,13 +4,14 @@ from config import configuration as config
 
 class body:
     cfg = None
-    def __init__(self, mass, position, velocity, radius, color, others=None):
+    def __init__(self, mass, position, velocity, radius, color, name, others=None):
+        self.name = name
         self.mass = mass
         self.position = np.array(position, dtype='float64')
         self.velocity = np.array(velocity, dtype='float64')
         self.radius = radius
         self.color = color
-        # self.getPVel = False
+        self.graph = [False, False, False] # velocity, acceleration, Energy
         self.selected = False
         self.dragging = False
         self.trail = []
@@ -75,8 +76,31 @@ class body:
         return np.sqrt(self.velocity[0]**2 + self.velocity[1]**2)
     def get_acceleration_magnitude(self):
         return np.sqrt(self.acceleration[0]**2 + self.acceleration[1]**2)
-    # def setPerfectOrbit():
-    #     if 
+    
+    def set_color(self, color_name):
+        colormap = {"WHITE" : (255, 255, 255),
+        "RED": (255, 0, 0),
+        "GREEN" :(0, 255, 0),
+        "BLUE" : (0, 0, 255),
+        "YELLOW" : (255, 255, 0)}
+
+        if isinstance(color_name, str) and color_name.upper() in colormap:
+            self.color = colormap[color_name.upper()]
+        elif isinstance(color_name, tuple) and len(color_name) == 3:
+            self.color = color_name
+    
+    def get_color(self):
+        reverseColormap = {(255, 255, 255): "WHITE",
+        (255, 0, 0): "RED",
+        (0, 255, 0): "GREEN",   
+        (0, 0, 255): "BLUE",
+        (255, 255, 0): "YELLOW"}
+
+        if self.color in reverseColormap:
+            return reverseColormap[self.color]
+        else:
+            return str(self.color)
+     
     @staticmethod
     def select_body(bodies, position):
         for b in bodies:

@@ -98,6 +98,7 @@ class UIEventHandler:
             elif event.ui_element == self.viz.info_panel.elements["upd_MassRad"]:
                 userinput = [self.viz.info_panel.elements["Mass_textBox"].get_text(), 
                              self.viz.info_panel.elements["Rad_textBox"].get_text(),
+                             self.viz.info_panel.elements["Color_textBox"].get_text(),
                              self.viz.info_panel.elements["vel_x_txtB"].get_text(),
                              self.viz.info_panel.elements["vel_y_txtB"].get_text()]
                 b = self.viz.simulation.getSelectedbody()
@@ -107,9 +108,16 @@ class UIEventHandler:
                     if userinput[1] != '':
                         b.radius = int(userinput[1])
                     if userinput[2] != '':
-                        b.velocity[0] = float(userinput[2])
+                        color_str = userinput[2].strip()
+                        if color_str.startswith('(') and color_str.endswith(')'):
+                            color_tuple = tuple(map(int, color_str[1:-1].split(',')))
+                            b.set_color(color_tuple)
+                        else:
+                            b.set_color(color_str)
                     if userinput[3] != '':
-                        b.velocity[1] = float(userinput[3])
+                        b.velocity[0] = float(userinput[3])
+                    if userinput[4] != '':
+                        b.velocity[1] = float(userinput[4])
                 except ValueError:
                     print("Invalid input! Please enter a number.")
                     self.viz.info_panel.elements["Mass_textBox"].set_text(str(b.mass))

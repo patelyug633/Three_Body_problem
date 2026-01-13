@@ -39,7 +39,7 @@ class Simulation:
             b.draw(screen)
 
     def add_central_body(self, mass=5e24, position=(400, 300), velocity=(0, 0), radius=25, color=(255, 255, 0)):
-        central_body = body(mass=mass, position=position, velocity=velocity, radius=radius, color=color)
+        central_body = body(mass=mass, position=position, velocity=velocity, radius=radius, color=color, name= f"Body_{len(self.bodies)+1}")
         self.bodies.append(central_body)
         self.centralBodies.append(central_body)
         return central_body
@@ -49,7 +49,7 @@ class Simulation:
         #     velocity  = self.cfg.get_PerfectOrbit_velocity(self.centralBodies[0].mass, onPos, self.centralBodies[0].position)
         if velocity is None:
             velocity = (0,0)
-        satellite = body(mass=mass, position=onPos, velocity=velocity, radius=radius, color=color)
+        satellite = body(mass=mass, position=onPos, velocity=velocity, radius=radius, color=color, name= f"Body_{len(self.bodies)+1}")
         self.bodies.append(satellite)
         return satellite
 
