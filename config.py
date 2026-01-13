@@ -1,5 +1,5 @@
 import numpy as np
-
+import pygame 
 class configuration:
     def __init__(self):
         self.G = 6.67430e-11         # Real gravitational constant
@@ -21,6 +21,41 @@ class configuration:
             return -y_vel, x_vel
         else:
             return y_vel, x_vel
+    def draw_grid(self, screen, spacing=50):
+        SCREEN_WIDTH = 1320
+        SCREEN_HEIGHT = 720
+        PANEL_WIDTH = 300
+
+    # Center of the remaining simulation area
+        SIM_ORIGIN_X = PANEL_WIDTH + (SCREEN_WIDTH - PANEL_WIDTH) // 2
+        SIM_ORIGIN_Y = SCREEN_HEIGHT // 2
+
+        # colors
+        GRID_COLOR = (40, 40, 40)
+        AXIS_COLOR = (120, 120, 120)
+
+        # vertical lines
+        x = SIM_ORIGIN_X % spacing
+        while x < 1320:
+            pygame.draw.line(screen, GRID_COLOR, (x, 0), (x, 720))
+            x += spacing
+
+        # horizontal lines
+        y = SIM_ORIGIN_Y % spacing
+        while y < 720:
+            pygame.draw.line(screen, GRID_COLOR, (0, y), (1320, y))
+            y += spacing
+
+        # axes (x=0 and y=0)
+        pygame.draw.line(
+            screen, AXIS_COLOR,
+            (SIM_ORIGIN_X, 0), (SIM_ORIGIN_X, 720), 2
+        )
+        pygame.draw.line(
+            screen, AXIS_COLOR,
+            (0, SIM_ORIGIN_Y), (1320, SIM_ORIGIN_Y), 2
+        )
+
         
     def update_VV(self, others):
         dt = self.F_dt * self.time_scale

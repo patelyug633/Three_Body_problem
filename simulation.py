@@ -10,6 +10,7 @@ class Simulation:
         self.centralBodies = [] # To track if central body is only one in the simulation
         self.bodies = self.cfg.bodies
         self.viz = viz
+        self.selected_body = None
         
     def getConfig(self):
         return self.cfg
@@ -43,20 +44,22 @@ class Simulation:
         self.centralBodies.append(central_body)
         return central_body
 
-    def add_satellite_body(self, onPos, mass = 10, radius = 5, color = (255,0,0), velocity = None):
-        if velocity is None and len(self.centralBodies) == 1:
-            velocity  = self.cfg.get_PerfectOrbit_velocity(self.centralBodies[0].mass, onPos, self.centralBodies[0].position)
+    def add_satellite_body(self, onPos, mass = 10, radius = 5, color = (255,0,0), velocity = (0,0)):
+        # if velocity is None and len(self.centralBodies) == 1:
+        #     velocity  = self.cfg.get_PerfectOrbit_velocity(self.centralBodies[0].mass, onPos, self.centralBodies[0].position)
         if velocity is None:
             velocity = (0,0)
         satellite = body(mass=mass, position=onPos, velocity=velocity, radius=radius, color=color)
         self.bodies.append(satellite)
         return satellite
+
     def handle_click(self, position, mode):
         x, y = position
         b = body.select_body(self.bodies, (x, y)) if mode is None else None
         if b is not None:
             self.viz.UIBuilder.selected_body_panel(b)
             print(f"Selected body at position: {b.position} with mass: {b.mass}")
+            self.selected_body = b
         else:
             if mode == "Add_satelite":
                 self.add_satellite_body((x, y))
@@ -88,5 +91,18 @@ class Simulation:
 
     def selectBody(self, pos):
         b = body.select_body(self.bodies, pos)
-
+        self.selected_body = b
         return b
+    
+    def getSelectedbody(self):
+        return self.selected_body
+    
+    def unselectBodies(self):
+        body.unselect_body(self.bodies)
+        self.selected_body = None
+
+    def getPOrbit(self):
+        if len(self.centralBodies) == 1:
+            velocity  = self.cfg.get_PerfectOrbit_velocity(self.centralBodies[0].mass, self.selected_body.position, self.centralBodies[0].position)
+            return velocity
+        

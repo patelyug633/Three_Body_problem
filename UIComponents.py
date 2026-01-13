@@ -1,11 +1,14 @@
 import pygame
 import pygame_gui as pgui
 
-
+CENTER_X = 810
+CENTER_Y = 360
 class UIComponents:
-    def __init__(self, manager, screen_size):
-        self.manager = manager
-        self.screen_size = screen_size
+
+    def __init__(self, viz):
+        self.viz = viz
+        self.manager = self.viz.Uim
+        self.screen_size = self.viz.screen_HW
         self.panel = {}
         self.selected_bodyPanel = None
         self.elements = {}   # store everything here
@@ -122,6 +125,11 @@ class UIComponents:
         y += gap_y//2
         self.checkbox("acc_vec", "Show Acceleration vector", (10, y))
         y += gap_y//2
+        self.checkbox("grid_mode", "Show grid", (10, y))
+        y += gap_y//2
+        self.checkbox("dist_mode", "Show distances", (10, y))
+        y += gap_y//2
+
 
         return self
 
@@ -151,17 +159,24 @@ class UIComponents:
         y += gap_y - 15
         self.label("vel_x_lbl", "x:", (-30, y), (90,30), self.panel["mass_prop"])
         self.textBox("vel_x_txtB", (23, y), (90,30), self.panel["mass_prop"])
+        self.elements["vel_x_txtB"].set_text(str(round(b.velocity[0], 2))),
         self.label("vel_y_lbl", "y:", (80, y), (90,30), self.panel["mass_prop"])
         self.textBox("vel_y_txtB", (133, y), (90,30), self.panel["mass_prop"])
+        self.elements["vel_y_txtB"].set_text(str(round(b.velocity[1],2)))
         y += gap_y -15
 
+        self.checkbox("perfect_Orbit", "Get perfect satellite orbit", (10, y), self.panel["mass_prop"])
+        y += gap_y//2
 
-        self.label("Acceleration_lbl", "Acceleration (m^2/s): ", (-20, y), (200, 30), self.panel["mass_prop"])
+
+        self.label("Position_lbl", "Position: ", (-60, y), (200, 30), self.panel["mass_prop"])
         y += gap_y-15
-        self.label("acc_x_lbl", "x:", (-30, y), (90,30), self.panel["mass_prop"])
-        self.textBox("acc_x_txtB", (23, y), (90,30), self.panel["mass_prop"])
-        self.label("acc_y_lbl", "y:", (80, y), (90,30), self.panel["mass_prop"])
-        self.textBox("acc_y_txtB", (133, y), (90,30), self.panel["mass_prop"])
+        self.label("pos_x_lbl", "x:", (-30, y), (90,30), self.panel["mass_prop"])
+        self.textBox("pos_x_txtB", (23, y), (90,30), self.panel["mass_prop"])
+        self.elements["pos_x_txtB"].set_text(str(round(b.position[0]+510, 2)))
+        self.label("pos_y_lbl", "y:", (80, y), (90,30), self.panel["mass_prop"])
+        self.textBox("pos_y_txtB", (133, y), (90,30), self.panel["mass_prop"])
+        self.elements["pos_y_txtB"].set_text(str(round(b.position[1]-360,2)))
         y += gap_y - 15
 
         self.button("upd_MassRad", "Enter", (220,y), (67, 40), "button", self.panel["mass_prop"])
@@ -173,9 +188,27 @@ class UIComponents:
         y += gap_y//2
         self.checkbox("E_grh", "Generate Energy graph", (10,y), self.panel["mass_prop"])
         y += gap_y//2
-        self.checkbox("perfect_Orbit", "Get perfect satellite orbit", (10, y), self.panel["mass_prop"])
-        y += gap_y//2
+        
+        
+        if b.mass > 5e11:
+            self.elements["perfect_Orbit"].disable()
+        if len(self.viz.simulation.centralBodies) >= 2:
+            self.elements["perfect_Orbit"].disable()
+        
     
     def selected_body_panel_kill(self):
         if "mass_prop" in self.panel:
             self.panel["mass_prop"].kill()
+    
+    def update_selected_body_panel(self, b):
+        if b is None:
+            return
+
+        if "pos_x_txtB" not in self.elements:
+            return
+        # IMPORTANT: only update if user is NOT typing
+        if not self.elements["pos_x_txtB"].is_focused:
+            self.elements["pos_x_txtB"].set_text(str(round(b.position[0] - CENTER_X, 2)))
+
+        if not self.elements["pos_y_txtB"].is_focused:
+            self.elements["pos_y_txtB"].set_text(str(round(CENTER_Y - b.position[1], 2)))

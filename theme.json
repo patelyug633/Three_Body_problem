@@ -6,7 +6,9 @@
       "normal_text": "#ECF0F1",
       "hovered_bg": "#34495E",
       "hovered_text": "#3498DB",
-      "disabled_text": "#95A5A6"
+      "disabled_text": "#95A5A6",
+      "selected_bg": "#34495E",
+      "selected_text": "#3498DB"
     }
   },
   "#Clearbodies_button": {

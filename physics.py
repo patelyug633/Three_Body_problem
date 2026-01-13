@@ -10,6 +10,7 @@ class body:
         self.velocity = np.array(velocity, dtype='float64')
         self.radius = radius
         self.color = color
+        # self.getPVel = False
         self.selected = False
         self.dragging = False
         self.trail = []
@@ -74,6 +75,8 @@ class body:
         return np.sqrt(self.velocity[0]**2 + self.velocity[1]**2)
     def get_acceleration_magnitude(self):
         return np.sqrt(self.acceleration[0]**2 + self.acceleration[1]**2)
+    # def setPerfectOrbit():
+    #     if 
     @staticmethod
     def select_body(bodies, position):
         for b in bodies:

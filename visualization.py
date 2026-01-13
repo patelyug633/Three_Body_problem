@@ -19,17 +19,18 @@ class Visualization:
         self.cfg = self.simulation.cfg
         self.Uim = pgui.UIManager(self.screen_HW, 'theme.json')
         self.bodies = self.simulation.bodies
-        self.pause = False
+        self.pause = True
         self.input_mode = None
+        self.show_distance = False
         self.dragging_body = None
         self.drag_offset = (0, 0)
         self.show_vector_v = False
         self.show_vector_a = False
+        self.show_grid = False
         self.running = True
         self.clock = pygame.time.Clock()
-        self.UIBuilder = UIComponents(self.Uim, self.screen_HW)
+        self.UIBuilder = UIComponents(self)
         self.UIHandler = UIEventHandler(self)  
-
         self.info_panel = self.UIBuilder.build()
 
     def vis_loop(self):
@@ -42,12 +43,19 @@ class Visualization:
                 time_delta = self.clock.tick(60) / 1000.0
 
             self.screen.fill((0, 0, 0))
+            if self.show_grid:
+                self.cfg.draw_grid(self.screen)
+            if self.show_distance:
+                self.draw_all_distances()
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False   
                 self.UIHandler.handle(event)
                 self.Uim.process_events(event)   
-            
+            b = self.simulation.getSelectedbody()
+            if b is not None:
+                self.UIBuilder.update_selected_body_panel(b)
             self.Uim.update(time_delta)
 
             if self.pause:
@@ -115,6 +123,58 @@ class Visualization:
 
     def mouse_over_ui(self):
         return self.Uim.get_hovering_any_element()
+    
+    def draw_distance(self, screen, b1, b2):
+        x1, y1 = b1.position
+        x2, y2 = b2.position
+
+        # Draw line
+        pygame.draw.line(screen, (120, 120, 120), (x1, y1), (x2, y2), 1)
+
+        # Distance in sim units
+        dx = x2 - x1
+        dy = y2 - y1
+        sim_dist = (dx**2 + dy**2)**0.5
+
+        # Convert to meters
+        dist_m = sim_dist * self.cfg.distance_scale
+        text = f"{dist_m:.2e} m"
+
+        # Midpoint
+        mid_x = (x1 + x2) / 2
+        mid_y = (y1 + y2) / 2
+
+        # Perpendicular offset
+        length = max(sim_dist, 1)
+        nx = -dy / length
+        ny = dx / length
+
+        offset = 18
+        label_x = mid_x + nx * offset
+        label_y = mid_y + ny * offset
+
+        # Push away from bodies
+        label_x += 10 if nx >= 0 else -10
+        label_y += 10 if ny >= 0 else -10
+
+        # Render
+        font = pygame.font.SysFont("consolas", 14)
+        surf = font.render(text, True, (200, 200, 200))
+        rect = surf.get_rect(center=(label_x, label_y))
+
+        screen.blit(surf, rect)
+    
+    def draw_all_distances(self):
+        n = len(self.bodies)
+        for i in range(n):
+            for j in range(i + 1, n):
+                self.draw_distance(
+                    self.screen,
+                    self.bodies[i],
+                    self.bodies[j]
+                )
+
+    
 
 
 if __name__ == "__main__":
