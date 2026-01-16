@@ -1,5 +1,7 @@
+# simulation.py
 from physics import body
 from config import configuration as config
+from graph import Graph
 
 class SimulationError(Exception):
     pass
@@ -11,6 +13,8 @@ class Simulation:
         self.bodies = self.cfg.bodies
         self.viz = viz
         self.selected_body = None
+        self.graph_logs = {}
+        self.logged_bodies = set()
         
     def getConfig(self):
         return self.cfg
@@ -21,6 +25,8 @@ class Simulation:
         F_dt = cfg.F_dt
         while self.elapsed_time >= F_dt:
             cfg.update_VV(self.bodies)
+            self.cfg.sim_time += F_dt
+            self.log_graph_data()
             self.elapsed_time -= F_dt
 
         # return self.elapsed_time
@@ -74,7 +80,7 @@ class Simulation:
                 mode = None
                 self.viz.info_panel.elements["add_cen"].unselect()
             else:
-                body.unselect_body(self.bodies)
+                self.unselectBodies()
                 self.viz.UIBuilder.selected_body_panel_kill()
         return mode
     
@@ -105,4 +111,33 @@ class Simulation:
         if len(self.centralBodies) == 1:
             velocity  = self.cfg.get_PerfectOrbit_velocity(self.centralBodies[0].mass, self.selected_body.position, self.centralBodies[0].position)
             return velocity
-        
+    
+    def start_logging(self, body):
+        if body not in self.graph_logs:
+            self.graph_logs[body] = Graph(body.name)
+        self.logged_bodies.add(body)
+    
+    def stop_logging(self, body):
+        self.logged_bodies.discard(body)
+
+
+    def log_graph_data(self):
+        for body in self.logged_bodies:
+            graph = self.graph_logs[body]
+
+            vel = body.velocity
+            acc = body.acceleration
+
+            vel_mag = (vel[0]**2 + vel[1]**2) ** 0.5
+            acc_mag = (acc[0]**2 + acc[1]**2) ** 0.5
+
+            U = body.get_potential_energy(self.bodies)
+
+            graph.record(
+                (self.cfg.sim_time*self.cfg.time_scale),
+                vel_mag,
+                acc_mag,
+                body.mass,
+                vel,
+                U
+            )

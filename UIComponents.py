@@ -1,3 +1,4 @@
+# UIComponents.py
 import pygame
 import pygame_gui as pgui
 
@@ -130,6 +131,12 @@ class UIComponents:
         self.checkbox("dist_mode", "Show distances", (10, y))
         y += gap_y//2
 
+        self.button("graph_log", "Graph Logs", (10, y), (216,40))
+        y += gap_y
+        self.button("view_graphs", "View Graph", (10, y), (216,40))
+        y += gap_y
+
+
 
         return self
 
@@ -141,6 +148,11 @@ class UIComponents:
         self.label("mass_properties", "Selected Mass properties", (50, y), (200,30), self.panel["mass_prop"])
         y += 35
         gap_y = 45
+
+        self.label("name_lbl", "Name: ", (-70, y), (200, 30), self.panel["mass_prop"])
+        self.textBox("Name_textBox", (60, y), (180,30), self.panel["mass_prop"])
+        self.elements["Name_textBox"].set_text(str(b.name))
+        y += gap_y - 15
 
 
         self.label("mass_lbl", "Mass: ", (-70, y), (200, 30), self.panel["mass_prop"])
@@ -155,7 +167,7 @@ class UIComponents:
         self.label("rad_lblUnits", "Pixels", (160, y), (200, 30), self.panel["mass_prop"])
         y += gap_y - 15
 
-        self.label("color_lbl", "color: ", (-70, y), (200, 30), self.panel["mass_prop"])
+        self.label("color_lbl", "Color: ", (-70, y), (200, 30), self.panel["mass_prop"])
         self.textBox("Color_textBox", (60, y), (180, 30), self.panel["mass_prop"])
         self.elements["Color_textBox"].set_text(str(b.get_color()))
         self.label("color_lblUnits", "RGB", (160, y), (200, 30), self.panel["mass_prop"])
@@ -188,12 +200,8 @@ class UIComponents:
         self.button("upd_MassRad", "Enter", (220,y), (67, 40), "button", self.panel["mass_prop"])
         y += gap_y - 5
 
-        self.checkbox("vel_grh", "Generate velocity graph", (10, y),self.panel["mass_prop"])
-        y += gap_y//2
-        self.checkbox("acc_grh", "Generate acceleration graph", (10, y), self.panel["mass_prop"])
-        y += gap_y//2
-        self.checkbox("E_grh", "Generate Energy graph", (10,y), self.panel["mass_prop"])
-        y += gap_y//2
+        self.checkbox("grh", "Generate graphs", (10, y),self.panel["mass_prop"])
+    
         
         
         if b.mass > 7e22:
@@ -219,3 +227,68 @@ class UIComponents:
 
         if not self.elements["pos_y_txtB"].is_focused:
             self.elements["pos_y_txtB"].set_text(str(round(CENTER_Y - b.position[1], 2)))
+    
+    def display_log(self, logs):
+        if "log_panel" in self.panel:
+            self.panel["log_panel"].kill()
+
+        self.create_panel("log_panel", (310, 10), (700, 700))
+
+        y = 10
+        gap_y = 30
+
+        for log in logs:
+            self.label(f"log_{y}", log, (10, y), (680, 25), self.panel["log_panel"])
+            y += gap_y
+    
+    def graph_panel(self, body):
+        # Kill existing panel if open
+        if "graph_panel" in self.panel:
+            self.panel["graph_panel"].kill()
+
+        self.create_panel("graph_panel", (1020, 520), (300, 200))
+        y = 10
+
+        self.label(
+            "graph_title",
+            f"Graphs: {body.name}",
+            (30, y),
+            (240, 30),
+            self.panel["graph_panel"]
+        )
+        y += 40
+
+        self.button(
+            "graph_vel",
+            "Velocity",
+            (30, y),
+            (240, 35),
+            container=self.panel["graph_panel"]
+        )
+        y += 45
+
+        self.button(
+            "graph_acc",
+            "Acceleration",
+            (30, y),
+            (240, 35),
+            container=self.panel["graph_panel"]
+        )
+        y += 45
+
+        self.button(
+            "graph_energy",
+            "Energy",
+            (30, y),
+            (240, 35),
+            container=self.panel["graph_panel"]
+        )
+        
+    def kill_graph_panel_if_clicked_outside(self, mouse_pos):
+        if "log_panel" not in self.panel:
+            return
+
+        panel = self.panel["log_panel"]
+        if not panel.get_relative_rect().collidepoint(mouse_pos):
+            panel.kill()
+            del self.panel["log_panel"]

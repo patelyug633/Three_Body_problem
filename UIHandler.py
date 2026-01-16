@@ -11,6 +11,10 @@ class UIEventHandler:
     
     def handle(self, event):
 
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.viz.UIBuilder.kill_graph_panel_if_clicked_outside(event.pos)
+
+
         self.handle_keyStrokes(event)
 
         self.handle_UIbutton(event)
@@ -41,6 +45,13 @@ class UIEventHandler:
             self.viz.info_panel.elements["remove"].enable()
             self.viz.info_panel.elements["pause"].select()
             self.viz.info_panel.elements["run"].unselect()
+        
+        if not self.viz.simulation.selected_body:
+            self.viz.info_panel.elements["remove"].disable()
+            self.viz.info_panel.elements["view_graphs"].disable()
+        else:
+            self.viz.info_panel.elements["remove"].enable()
+            self.viz.info_panel.elements["view_graphs"].enable()
 
     def handle_keyStrokes(self, event):
         #------------------------------
@@ -95,8 +106,9 @@ class UIEventHandler:
                     self.viz.info_panel.elements["add_cen"]
                 else:
                     self.viz.input_mode = None
-            elif event.ui_element == self.viz.info_panel.elements["upd_MassRad"]:
-                userinput = [self.viz.info_panel.elements["Mass_textBox"].get_text(), 
+            elif "upd_MassRad" in self.viz.info_panel.elements and event.ui_element == self.viz.info_panel.elements["upd_MassRad"]:
+                userinput = [self.viz.info_panel.elements["Name_textBox"].get_text(),
+                             self.viz.info_panel.elements["Mass_textBox"].get_text(), 
                              self.viz.info_panel.elements["Rad_textBox"].get_text(),
                              self.viz.info_panel.elements["Color_textBox"].get_text(),
                              self.viz.info_panel.elements["vel_x_txtB"].get_text(),
@@ -104,26 +116,63 @@ class UIEventHandler:
                 b = self.viz.simulation.getSelectedbody()
                 try:
                     if userinput[0] != '':
-                        b.mass = float(userinput[0])
+                        b.name = str(userinput[0])
                     if userinput[1] != '':
-                        b.radius = int(userinput[1])
+                        b.mass = float(userinput[1])
                     if userinput[2] != '':
-                        color_str = userinput[2].strip()
+                        b.radius = int(userinput[2])
+                    if userinput[3] != '':
+                        color_str = userinput[3].strip()
                         if color_str.startswith('(') and color_str.endswith(')'):
                             color_tuple = tuple(map(int, color_str[1:-1].split(',')))
                             b.set_color(color_tuple)
                         else:
                             b.set_color(color_str)
-                    if userinput[3] != '':
-                        b.velocity[0] = float(userinput[3])
                     if userinput[4] != '':
-                        b.velocity[1] = float(userinput[4])
+                        b.velocity[0] = float(userinput[4])
+                    if userinput[5] != '':
+                        b.velocity[1] = float(userinput[5])
                 except ValueError:
                     print("Invalid input! Please enter a number.")
                     self.viz.info_panel.elements["Mass_textBox"].set_text(str(b.mass))
                     self.viz.info_panel.elements["Rad_textBox"].set_text(str(b.radius))
                     self.viz.info_panel.elements["vel_x_txtB"].set_text(str(b.velocity[0]))
                     self.viz.info_panel.elements["vel_y_txtB"].set_text(str(b.velocity[1]))
+            elif event.ui_element == self.viz.info_panel.elements["view_graphs"]:
+                b = self.viz.simulation.getSelectedbody()
+                if b is None:
+                    print("No body selected for graphing.")
+                    return
+
+                if b not in self.viz.simulation.graph_logs:
+                    print("No graph data recorded for this body.")
+                    return
+
+                self.viz.UIBuilder.graph_panel(b)
+            elif "graph_vel" in self.viz.UIBuilder.elements and \
+                 event.ui_element == self.viz.UIBuilder.elements["graph_vel"]:
+                b = self.viz.simulation.getSelectedbody()
+                self.viz.simulation.graph_logs[b].plot_velocity()
+
+            elif "graph_acc" in self.viz.UIBuilder.elements and \
+                 event.ui_element == self.viz.UIBuilder.elements["graph_acc"]:
+                b = self.viz.simulation.getSelectedbody()
+                self.viz.simulation.graph_logs[b].plot_acceleration()
+
+            elif "graph_energy" in self.viz.UIBuilder.elements and \
+                 event.ui_element == self.viz.UIBuilder.elements["graph_energy"]:
+                b = self.viz.simulation.getSelectedbody()
+                self.viz.simulation.graph_logs[b].plot_energy()
+            
+            elif "graph_log" in self.viz.info_panel.elements and event.ui_element == self.viz.info_panel.elements["graph_log"]:
+                logs = []
+
+                for b, graph in self.viz.simulation.graph_logs.items():
+                    status = "Recording" if b in self.viz.simulation.logged_bodies else "Stopped"
+                    logs.append(f"{b.name}  |  {status}")
+
+                self.viz.UIBuilder.display_log(logs)
+
     def handle_checkBox(self, event):
         #------------------------------
         # Checkbox handling. !! Prototyping !!
@@ -147,6 +196,10 @@ class UIEventHandler:
                 vel = self.viz.simulation.getPOrbit()
                 self.viz.info_panel.elements["vel_x_txtB"].set_text(str(round(vel[0], 2)))
                 self.viz.info_panel.elements["vel_y_txtB"].set_text(str(round(vel[1], 2)))
+            elif "grh" in self.viz.info_panel.elements \
+             and event.ui_element == self.viz.info_panel.elements["grh"]:
+                b = self.viz.simulation.getSelectedbody()
+                self.viz.simulation.start_logging(b)
             
 
         if event.type == pgui.UI_CHECK_BOX_UNCHECKED:
@@ -161,6 +214,10 @@ class UIEventHandler:
                 self.viz.show_grid = not self.viz.show_grid
             elif event.ui_element == self.viz.info_panel.elements["dist_mode"]:
                 self.viz.show_distance = not self.viz.show_distance
+            elif "grh" in self.viz.info_panel.elements \
+             and event.ui_element == self.viz.info_panel.elements["grh"]:
+                b = self.viz.simulation.getSelectedbody()
+                self.viz.simulation.stop_logging(b)
 
     
     def handle_mouse_drag(self, event):

@@ -1,3 +1,4 @@
+# physics.py
 import numpy as np
 import pygame
 from config import configuration as config
@@ -11,7 +12,6 @@ class body:
         self.velocity = np.array(velocity, dtype='float64')
         self.radius = radius
         self.color = color
-        self.graph = [False, False, False] # velocity, acceleration, Energy
         self.selected = False
         self.dragging = False
         self.trail = []
@@ -100,7 +100,21 @@ class body:
             return reverseColormap[self.color]
         else:
             return str(self.color)
-     
+        
+    def get_potential_energy(self, bodies):
+        U = 0 
+        for body1 in bodies:
+            if body1 != self:
+                dx = (self.position[0] - body1.position[0]) * body.cfg.distance_scale
+                dy = (self.position[1] - body1.position[1]) * body.cfg.distance_scale
+                distance = np.sqrt(dx**2 + dy**2)
+                if distance != 0:
+                    U -= body.cfg.G * self.mass * body1.mass / distance
+        return U
+    
+    def kinetic_energy(self):
+        return 0.5 * self.mass * (self.velocity[0]**2 + self.velocity[1]**2)
+
     @staticmethod
     def select_body(bodies, position):
         for b in bodies:

@@ -1,3 +1,4 @@
+# config.py
 import numpy as np
 import pygame 
 class configuration:
@@ -7,6 +8,8 @@ class configuration:
         self.time_scale = 60*60*24  # 1 frame = 1 day
         self.F_dt = 1/60 # 1 frame = 1 second
         self.bodies = []
+        self.sim_time = 0.0
+
     def get_PerfectOrbit_velocity(self, mass_central, current_pos, central_pos=(320,240)):
         x, y = current_pos
         central_x, central_y = central_pos
