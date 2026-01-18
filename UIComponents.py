@@ -201,7 +201,11 @@ class UIComponents:
         y += gap_y - 5
 
         self.checkbox("grh", "Generate graphs", (10, y),self.panel["mass_prop"])
-    
+        # Sync checkbox with simulation state
+        if b in self.viz.simulation.logged_bodies:
+            self.elements["grh"].set_state(True)
+        else:
+            self.elements["grh"].set_state(False)
         
         
         if b.mass > 7e22:
@@ -292,3 +296,12 @@ class UIComponents:
         if not panel.get_relative_rect().collidepoint(mouse_pos):
             panel.kill()
             del self.panel["log_panel"]
+
+    def graph_panel_kill(self):
+        if "graph_panel" in self.panel:
+            self.panel["graph_panel"].kill()
+            del self.panel["graph_panel"]
+    
+        for k in ["graph_vel", "graph_acc", "graph_energy", "graph_title"]:
+            if k in self.elements:
+                del self.elements[k]

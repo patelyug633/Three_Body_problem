@@ -63,6 +63,9 @@ class Simulation:
         x, y = position
         b = body.select_body(self.bodies, (x, y)) if mode is None else None
         if b is not None:
+            if self.selected_body is not None and self.selected_body != b:
+                self.viz.UIBuilder.graph_panel_kill()
+
             self.viz.UIBuilder.selected_body_panel(b)
             print(f"Selected body at position: {b.position} with mass: {b.mass}")
             self.selected_body = b
@@ -106,6 +109,8 @@ class Simulation:
     def unselectBodies(self):
         body.unselect_body(self.bodies)
         self.selected_body = None
+        if "graph_panel" in self.viz.UIBuilder.panel:
+            self.viz.UIBuilder.panel["graph_panel"].kill()
 
     def getPOrbit(self):
         if len(self.centralBodies) == 1:

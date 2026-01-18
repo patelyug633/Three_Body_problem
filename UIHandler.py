@@ -152,11 +152,14 @@ class UIEventHandler:
             elif "graph_vel" in self.viz.UIBuilder.elements and \
                  event.ui_element == self.viz.UIBuilder.elements["graph_vel"]:
                 b = self.viz.simulation.getSelectedbody()
+                
                 self.viz.simulation.graph_logs[b].plot_velocity()
 
             elif "graph_acc" in self.viz.UIBuilder.elements and \
                  event.ui_element == self.viz.UIBuilder.elements["graph_acc"]:
                 b = self.viz.simulation.getSelectedbody()
+                if b is None:
+                    return
                 self.viz.simulation.graph_logs[b].plot_acceleration()
 
             elif "graph_energy" in self.viz.UIBuilder.elements and \
